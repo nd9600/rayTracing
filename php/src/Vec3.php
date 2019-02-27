@@ -77,9 +77,6 @@ class Vec3 implements ArrayAccess
     public function makeUnitVector(): Vec3
     {
         $k = 1.0 / $this->length();
-        $this->e0 *= $k;
-        $this->e1 *= $k;
-        $this->e2 *= $k;
-        return $this;
+        return new Vec3($this->e0 * $k, $this->e1 * $k, $this->e2 * $k);
     }
 }
