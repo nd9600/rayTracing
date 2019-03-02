@@ -59,9 +59,9 @@ function doesHitSphere(Vec3 $center, float $radius, Ray $r): bool
     $rDirection = $r->direction();
     $a = $rDirection->dot($rDirection);
     $b = 2 * $fromCenterToRayOrigin->dot($rDirection);
-    $c = $fromCenterToRayOrigin->dot($fromCenterToRayOrigin) - $radius^2;
+    $c = $fromCenterToRayOrigin->dot($fromCenterToRayOrigin) - $radius**2;
 
-    $discriminant = $b^2 - 4*$a*$c;
+    $discriminant = $b**2 - 4*$a*$c;
     return $discriminant > 0;
 }
 
@@ -74,7 +74,8 @@ function colour(Ray $ray): Vec3
 {
     $sphereCenter = new Vec3(0, 0, -1);
     $sphereRadius = 0.5;
-    if (doesHitSphere($sphereCenter, $sphereRadius, $ray)) {
+    $rayHitsTheSphere = doesHitSphere($sphereCenter, $sphereRadius, $ray);
+    if ($rayHitsTheSphere) {
         $redColour = new Vec3(1, 0, 0);
         return $redColour;
     }
@@ -117,6 +118,10 @@ function writeFile($file, int $scale = 1)
                 ->add($horizontal->multiplyByConstant($u))
                 ->add($vertical->multiplyByConstant($v));
             $ray = new Ray($origin, $direction);
+
+            if ($nx > 100) {
+                $blah = 6;
+            }
 
             // colour of the ray is determined by its position
             $col = colour($ray);
