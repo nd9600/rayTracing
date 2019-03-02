@@ -28,32 +28,48 @@ function colour(Ray $ray): Vec3
     return new Vec3($e0, $e1, $e2);
 }
 
-$nx = 400;
-$ny = 200;
-echo "P3\n";
-echo "{$nx} {$ny}\n";
-echo "255\n";
+/**
+ * @param resource $file
+ * @param int $scale
+ */
+function writeFile($file, int $scale = 1)
+{
+    $nx = 200 * $scale;
+    $ny = 100 * $scale;
+    fwrite($file, "P3\n");
+    fwrite($file, "{$nx} {$ny}\n");
+    fwrite($file, "255\n");
 
-$lowerLeftCorner = new Vec3(-2, -1, -1);
-$horizontal = new Vec3(4, 0, 0);
-$vertical = new Vec3(0, 2, 0);
-$origin = new Vec3(0, 0, 0);
+    $lowerLeftCorner = new Vec3(-2, -1, -1);
+    $horizontal = new Vec3(4, 0, 0);
+    $vertical = new Vec3(0, 2, 0);
+    $origin = new Vec3(0, 0, 0);
 
-for ($j = $ny - 1; $j >= 0; $j--) {
-    for ($i = 0; $i < $nx; $i++) {
-        
-        $u = floatval($i / $nx);
-        $v = floatval($j / $ny);
-        
-        $direction = $lowerLeftCorner->add($horizontal->multiplyByConstant($u))->add($vertical->multiplyByConstant($v));
-        $ray = new Ray($origin, $direction);
-        $col = colour($ray);
-        $ir = intval(255.99 * $col[0]);
-        $ig = intval(255.99 * $col[1]);
-        $ib = intval(255.99 * $col[2]);
-        
-        echo "{$ir} {$ig} {$ib}\n";
+    for ($j = $ny - 1; $j >= 0; $j--) {
+        for ($i = 0; $i < $nx; $i++) {
+
+            $u = floatval($i / $nx);
+            $v = floatval($j / $ny);
+
+            // direction = lowerLeftCorner + u*horizontal + v*vertical
+            $direction = $lowerLeftCorner
+                ->add($horizontal->multiplyByConstant($u))
+                ->add($vertical->multiplyByConstant($v));
+            $ray = new Ray($origin, $direction);
+
+            // colour of the ray is determined by its position
+            $col = colour($ray);
+            $ir = intval(255.99 * $col[0]);
+            $ig = intval(255.99 * $col[1]);
+            $ib = intval(255.99 * $col[2]);
+
+            fwrite($file, "{$ir} {$ig} {$ib}\n");
+        }
     }
 }
+
+$file = fopen("output.ppm", "w") or die("Unable to open file!");
+writeFile($file);
+fclose($file);
 
 exit();
