@@ -50,24 +50,35 @@ function doesHitSphere(Vec3 $center, float $radius, Ray $r): bool
     // if 1 root, tangent to the sphere (discriminant is 0)
     // if 2 roots, goes through the sphere (discriminant is +ve)
 
-    // we can test it by coloring red any pixel that hits a small sphere we place at -1 on the z-axis
+    // we can test it by colouring red any pixel that hits a small sphere we place at -1 on the z-axis
 
+    /** @var Vec3 A - C */
+    $rOrigin = $r->origin();
+    $fromCenterToRayOrigin = $rOrigin->subtract($center);
 
+    $rDirection = $r->direction();
+    $a = $rDirection->dot($rDirection);
+    $b = 2 * $fromCenterToRayOrigin->dot($rDirection);
+    $c = $fromCenterToRayOrigin->dot($fromCenterToRayOrigin) - $radius^2;
 
-
-
-    return true;
+    $discriminant = $b^2 - 4*$a*$c;
+    return $discriminant > 0;
 }
 
 /**
- * Linearly blends white and blue depending on the up/downess of the y coordinate.
- * I first made it a unit vector so -1.0 < ​ y ​ < 1.0. I then did a standard graphics trick of scaling that to 0.0 < t < 1.0.
- * When t=1.0 I want blue. When t = 0.0 I want white. In between, I want a blend.
+ * Colours red any pixel that hits a small sphere we place at -1 on the z-axis, otherwise lerp of white to blue
  * @param Ray $ray
  * @return Vec3
  */
 function colour(Ray $ray): Vec3
 {
+    $sphereCenter = new Vec3(0, 0, -1);
+    $sphereRadius = 0.5;
+    if (doesHitSphere($sphereCenter, $sphereRadius, $ray)) {
+        $redColour = new Vec3(1, 0, 0);
+        return $redColour;
+    }
+
     $unitDirection =  $ray->direction()->makeUnitVector();
     $t = 0.5 * ($unitDirection->y() + 1);
     
