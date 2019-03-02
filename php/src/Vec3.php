@@ -58,8 +58,21 @@ class Vec3 implements ArrayAccess
     public function multiplyByConstant(float $t): Vec3{ return new Vec3($this->e0 * $t, $this->e1 * $t, $this->e2 * $t); }
     public function divide(Vec3 $v2): Vec3{ return new Vec3($this->e0 / $v2[0], $this->e1 / $v2[1], $this->e2 / $v2[2]); }
     public function divideByConstant(float $t): Vec3{ return new Vec3($this->e0 / $t, $this->e1 / $t, $this->e2 / $t); }
-    
+
+    /**
+     * Returns |v1| * |v2| * (cos angle between v1 and v2),
+     * i.e. applies the directional growth of v1 to v2. The result is how much stronger we've made v1 (positive, negative, or zero)
+     * i.e. the length of the projection of v1 onto the unit vector of v2 when the two vectors are placed so that their tails coincide
+     * @param Vec3 $v2
+     * @return float
+     */
     public function dot(Vec3 $v2): float{return ($this[0] * $v2[0]) + ($this[1] * $v2[1]) + ($this[2] * $v2[2]); }
+
+    /**
+     * Returns vector that is perpendicular to v2 and v2, with magnitude = area of parallelogram with v1 and v2 as sides
+     * @param Vec3 $v2
+     * @return Vec3
+     */
     public function cross(Vec3 $v2): Vec3
     {
         $newE0 = $this[1] * $v2[2] - $this[2] * $v2[1];
