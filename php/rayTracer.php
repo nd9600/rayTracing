@@ -36,9 +36,19 @@ function doesHitSphere(Vec3 $center, float $radius, Ray $r): bool
     // expanding and moving all terms to the left, we get
     // (t^2 * B dot B) + (2t * B dot (A - C)) + ((A - C) dot (A - C)) - r^2 = 0
     // we know A, B, C and r, so we can solve this quadratic equation for t
-    // if it has no roots, it doesn't hit the sphere
-    // if 1 root, tangent to the sphere
-    // if 2 roots, goes through the sphere
+
+    // quadratic formula
+    // x = ( -b +- sqrt(b^2 - 4ac) )/ 2a
+    // x1 = ( -b + sqrt(b^2 - 4ac) )/ 2a
+    // x2 = ( -b - sqrt(b^2 - 4ac) )/ 2a
+
+    // you can't have the sqrt of a negative number, so if b^2 - 4ac is negative, there are roots,
+    // if b^2 - 4ac = 0, sqrt(0) = 0, so x1 = x2 = ( -b +- 0 )/ 2a = -b / 2a
+    // if b^2 - 4ac is positive, there are 2 roots
+
+    // if it has no roots, it doesn't hit the sphere (discriminant is -ve)
+    // if 1 root, tangent to the sphere (discriminant is 0)
+    // if 2 roots, goes through the sphere (discriminant is +ve)
 
     // we can test it by coloring red any pixel that hits a small sphere we place at -1 on the z-axis
 
