@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 
+use RayTracer\Camera;
 use RayTracer\Hitable;
 use RayTracer\HitableList;
 use RayTracer\HitRecord;
@@ -59,14 +60,13 @@ function writeFile($file, int $scale = 1)
 {
     $nx = 200 * $scale;
     $ny = 100 * $scale;
+    $numberOfSamples = 100;
+
     fwrite($file, "P3\n");
     fwrite($file, "{$nx} {$ny}\n");
     fwrite($file, "255\n");
 
-    $lowerLeftCorner = new Vec3(-2, -1, -1);
-    $horizontal = new Vec3(4, 0, 0);
-    $vertical = new Vec3(0, 2, 0);
-    $origin = new Vec3(0, 0, 0);
+    $camera = new Camera();
 
     $listOfHitables = [
         new Sphere(new Vec3(0, 0, -1), 0.5),
@@ -77,17 +77,16 @@ function writeFile($file, int $scale = 1)
     for ($j = $ny - 1; $j >= 0; $j--) {
         for ($i = 0; $i < $nx; $i++) {
 
-            $u = floatval($i / $nx);
-            $v = floatval($j / $ny);
+            $col = new Vec3(0, 0, 0);
+            for ($s = 0; $s < $numberOfSamples; $s++) {
+                $u = floatval(($i + random()) / $nx);
+                $v = floatval(($j + random()) / $ny);
 
-            // direction = lowerLeftCorner + u*horizontal + v*vertical
-            $direction = $lowerLeftCorner
-                ->add($horizontal->multiplyByConstant($u))
-                ->add($vertical->multiplyByConstant($v));
-            $ray = new Ray($origin, $direction);
-
-            // colour of the ray is determined by its position
-            $col = colour($ray, $world);
+                // colour of the ray is determined by its position
+                $ray = $camera->getRay($u, $v);
+                $col = $col->add(colour($ray, $world));
+            }
+            $col = $col->divideByConstant($numberOfSamples);
 
             $ir = intval(255.99 * $col[0]);
             $ig = intval(255.99 * $col[1]);
