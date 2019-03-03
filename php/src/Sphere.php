@@ -65,15 +65,14 @@ class Sphere extends Hitable
         $fromCenterToRayOrigin = $rOrigin->subtract($this->center);
 
         $rDirection = $ray->direction();
+
         $a = $rDirection->dot($rDirection);
         $b = 2 * $fromCenterToRayOrigin->dot($rDirection);
         $c = $fromCenterToRayOrigin->dot($fromCenterToRayOrigin) - $this->radius**2;
 
         $discriminant = $b**2 - 4*$a*$c;
-
-        // eliminated redundant 2's that cancel each-other out
         if ($discriminant > 0) {
-            $tempT = (-$b - sqrt($discriminant)) / ($a);
+            $tempT = (-$b - sqrt($discriminant)) / (2*$a);
             if ($tMin < $tempT && $tempT < $tMax) {
                 $t = $tempT;
                 $p = $ray->pointAtParameter($t);
