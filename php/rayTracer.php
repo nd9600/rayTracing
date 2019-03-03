@@ -46,7 +46,10 @@ function colour(Ray $ray, Hitable $world): Vec3
 {
     /** @var boolean $didRayHitTheWorld */
     /** @var HitRecord $hitRecordOfWhereRayHitTheWorld */
-    [$didRayHitTheWorld, $hitRecordOfWhereRayHitTheWorld] = $world->hit($ray, 0, INF);
+
+    // some of the reflected rays hit the object they are reflecting off of not at exactly t=0, but instead at t=-0.0000001 or t=0.00000001 or whatever floating point approximation the sphere intersector gives us - this is called shadow acne, and is because of the discrete nature of the shadow map. A shadow map is composed of samples, a surface is continuous. Thus, there can be a spot on the surface where the discrete surface is further than the sample
+    // so we need to ignore hits very near zero
+    [$didRayHitTheWorld, $hitRecordOfWhereRayHitTheWorld] = $world->hit($ray, 0.001, INF);
     if ($didRayHitTheWorld) {
         $hitRecordNormal = $hitRecordOfWhereRayHitTheWorld->normal;
         $hitRecordP = $hitRecordOfWhereRayHitTheWorld->p;
@@ -136,7 +139,7 @@ function writeFile($file, int $scale = 1)
 }
 
 $file = fopen("output.ppm", "w") or die("Unable to open file!");
-writeFile($file, 1);
+writeFile($file, 3);
 fclose($file);
 
 exit();
