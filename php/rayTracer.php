@@ -18,7 +18,7 @@ require "vendor/autoload.php";
  */
 function doesHitSphere(Vec3 $center, float $radius, Ray $r): bool
 {
-    // at origin, equation of a sphere is x^2 + y^2 = r^2
+    // at the origin, the equation of a sphere is x^2 + y^2 = r^2
     // centered at point c, is (x-c)^2 + (y-c)^2 = r^2
 
     // vector from c = (c_x, c_y, c_z) to P = (x,y,z) is (P - c) = (x - c_x, y - c_y, z - c_z)
@@ -58,6 +58,7 @@ function doesHitSphere(Vec3 $center, float $radius, Ray $r): bool
     // a vector X - Y means the vector *from* Y to X:
     // since 0 + Y gets you to Y, then X - Y gets you to X
     // 0 + Y + (X - Y) = X
+    // so A - C is from the center of the sphere to the ray's origin (i.e. the camera)
 
     /** @var Vec3 A - C */
     $rOrigin = $r->origin();
