@@ -14,6 +14,15 @@ require "vendor/autoload.php";
 # psysh rayTracer.php | tail -n +2 | bat
 
 /**
+ * Returns a random float 0 <= x < 1
+ * @return float
+ */
+function random(): float
+{
+    return mt_rand(0, mt_getrandmax() - 1) / mt_getrandmax();
+}
+
+/**
  * Colours the surface normals of all objects in a world, otherwise lerp of white to blue
  * @param Ray $ray
  * @param Hitable $world
