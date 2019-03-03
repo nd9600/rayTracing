@@ -79,8 +79,15 @@ function writeFile($file, int $scale = 1)
 
             $col = new Vec3(0, 0, 0);
             for ($s = 0; $s < $numberOfSamples; $s++) {
-                $u = floatval(($i + random()) / $nx);
-                $v = floatval(($j + random()) / $ny);
+                $iWithAntiAliasing = $numberOfSamples === 1
+                    ? $i
+                    : $i + random();
+                $jWithAntiAliasing = $numberOfSamples === 1
+                    ? $j
+                    : $j + random();
+
+                $u = floatval(($iWithAntiAliasing) / $nx);
+                $v = floatval(($jWithAntiAliasing) / $ny);
 
                 // colour of the ray is determined by its position
                 $ray = $camera->getRay($u, $v);
