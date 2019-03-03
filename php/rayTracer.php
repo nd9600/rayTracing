@@ -37,7 +37,7 @@ function randomPointInUnitSphere(): Vec3
 }
 
 /**
- * Colours the surface normals of all objects in a world, otherwise lerp of white to blue
+ * Does diffuse reflection of all the objects in a world, otherwise lerp of white to blue
  * @param Ray $ray
  * @param Hitable $world
  * @return Vec3
@@ -51,9 +51,18 @@ function colour(Ray $ray, Hitable $world): Vec3
         $hitRecordNormal = $hitRecordOfWhereRayHitTheWorld->normal;
         $hitRecordP = $hitRecordOfWhereRayHitTheWorld->p;
 
-        $target = $hitRecordP->add($hitRecordNormal)->add(randomPointInUnitSphere());
-        $newRay = new Ray($hitRecordP, $target->subtract($hitRecordP));
+        // to do diffuse reflection (they go in random directions, unlike specular reflection) - we want to project a ray in a random direction from the hitpoint and colour it:
+        // pick a random point s from the unit radius sphere that is tangent to the hitpoint p, and send a ray from the hitpoint p to the random point s
+        // that sphere has center (​p + N), since N is a unit vector perpendicular to the plane tangent to the hitpoint - that's how the normal is defined!
+        // so, to get to s, we need a vector from the center of the unit sphere to s
 
+        // objects will be lighter on the top because the reflect fewer times (so they lose less energy)
+
+        $centerOfUnitSphereTangentToHitpoint = $hitRecordP->add($hitRecordNormal);
+        $randomReflectionPoint = $centerOfUnitSphereTangentToHitpoint->add(randomPointInUnitSphere());
+        $newRay = new Ray($hitRecordP, $randomReflectionPoint->subtract($hitRecordP));
+
+        // multiply by 0.5 so the objects absorb half the energy on each bounce
         return colour($newRay, $world)->multiplyByConstant(0.5);
     }
 
