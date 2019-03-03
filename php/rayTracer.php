@@ -119,6 +119,9 @@ function writeFile($file, int $scale = 1)
             }
             $col = $col->divideByConstant($numberOfSamples);
 
+            // with a digital camera, when twice the number of photons hit the sensor, it receives twice the signal (linear)
+            // our eyes perceive twice the light as being only a fraction brighter — and increasingly so for higher light intensities (nonlinear)
+
             // it should be light grey, but image viewers assume that the image is “gamma corrected” (meaning the 0 to 1 values have some transform before being stored as a byte)
             // so we have to actually gamma correct it: we can use “gamma 2” which means raising the color to the power 1/gamma, or 1/2 in the simple case
             $col = new Vec3(sqrt($col->r()), sqrt($col->g()), sqrt($col->b()));
