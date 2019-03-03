@@ -83,7 +83,7 @@ function whereRayHitsSphere(Vec3 $center, float $radius, Ray $r): float
  */
 function colour(Ray $ray): Vec3
 {
-    $sphereCenter = new Vec3(-0.25, -0.25, -1);
+    $sphereCenter = new Vec3(0, 0, -1);
     $sphereRadius = 0.5;
     $valueOfTWhereRayHitsSphere = whereRayHitsSphere($sphereCenter, $sphereRadius, $ray);
     $rayHitsSphere = $valueOfTWhereRayHitsSphere > 0;
