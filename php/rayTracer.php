@@ -13,8 +13,12 @@ require "vendor/autoload.php";
 # php rayTracer.php > 1.ppm
 # psysh rayTracer.php | tail -n +2 | bat
 
+function clamp($current, $min, $max) {
+    return max($min, min($max, $current));
+}
+
 /**
- * Colours the surface normals of a small sphere we place at -1 on the z-axis, otherwise lerp of white to blue
+ * Colours the surface normals of all objects in a world, otherwise lerp of white to blue
  * @param Ray $ray
  * @param Hitable $world
  * @return Vec3
@@ -79,9 +83,11 @@ function writeFile($file, int $scale = 1)
 
             // colour of the ray is determined by its position
             $col = colour($ray, $world);
-            $ir = intval(255.99 * $col[0]);
-            $ig = intval(255.99 * $col[1]);
-            $ib = intval(255.99 * $col[2]);
+
+            // sometimes they are < 0 or > 255 ?
+            $ir = clamp(intval(255.99 * $col[0]), 0, 255);
+            $ig = clamp(intval(255.99 * $col[1]), 0, 255);
+            $ib = clamp(intval(255.99 * $col[2]), 0, 255);
 
             fwrite($file, "{$ir} {$ig} {$ib}\n");
         }
