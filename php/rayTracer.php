@@ -60,7 +60,7 @@ function writeFile($file, int $scale = 1)
 {
     $nx = 200 * $scale;
     $ny = 100 * $scale;
-    $numberOfSamples = 100;
+    $numberOfSamples = 1;
 
     fwrite($file, "P3\n");
     fwrite($file, "{$nx} {$ny}\n");
