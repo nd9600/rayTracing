@@ -127,10 +127,6 @@ function writeFile($file, int $scale = 1)
                 ->add($vertical->multiplyByConstant($v));
             $ray = new Ray($origin, $direction);
 
-            if ($nx > 100) {
-                $blah = 6;
-            }
-
             // colour of the ray is determined by its position
             $col = colour($ray);
             $ir = intval(255.99 * $col[0]);
@@ -143,7 +139,7 @@ function writeFile($file, int $scale = 1)
 }
 
 $file = fopen("output.ppm", "w") or die("Unable to open file!");
-writeFile($file);
+writeFile($file, 1);
 fclose($file);
 
 exit();
