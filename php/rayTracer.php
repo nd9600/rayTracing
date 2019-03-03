@@ -10,13 +10,13 @@ require "vendor/autoload.php";
 # psysh rayTracer.php | tail -n +2 | bat
 
 /**
- * Whether a ray $r hits a sphere centered at $center with a radius $radius
+ * Returns the value of t in $r = A + tB where a ray $r hits a sphere centered at $center with a radius $radius, or -1 if it doesn't hit (you can sub-in t later to get the exact position)
  * @param Vec3 $center
  * @param float $radius
  * @param Ray $r
- * @return bool
+ * @return float
  */
-function doesHitSphere(Vec3 $center, float $radius, Ray $r): bool
+function whereRayHitsSphere(Vec3 $center, float $radius, Ray $r): float
 {
     // at the origin, the equation of a sphere is x^2 + y^2 = r^2
     // centered at point c, is (x-c)^2 + (y-c)^2 = r^2
@@ -70,22 +70,31 @@ function doesHitSphere(Vec3 $center, float $radius, Ray $r): bool
     $c = $fromCenterToRayOrigin->dot($fromCenterToRayOrigin) - $radius**2;
 
     $discriminant = $b**2 - 4*$a*$c;
-    return $discriminant > 0;
+    if ($discriminant < 0) {
+        return -1;
+    }
+    return (-$b - sqrt($discriminant)) / (2 * $a);
 }
 
 /**
- * Colours red any pixel that hits a small sphere we place at -1 on the z-axis, otherwise lerp of white to blue
+ * Colours the surface normals of a small sphere we place at -1 on the z-axis, otherwise lerp of white to blue
  * @param Ray $ray
  * @return Vec3
  */
 function colour(Ray $ray): Vec3
 {
-    $sphereCenter = new Vec3(0, 0, -1);
+    $sphereCenter = new Vec3(-0.25, -0.25, -1);
     $sphereRadius = 0.5;
-    $rayHitsTheSphere = doesHitSphere($sphereCenter, $sphereRadius, $ray);
-    if ($rayHitsTheSphere) {
-        $redColour = new Vec3(1, 0, 0);
-        return $redColour;
+    $valueOfTWhereRayHitsSphere = whereRayHitsSphere($sphereCenter, $sphereRadius, $ray);
+    $rayHitsSphere = $valueOfTWhereRayHitsSphere > 0;
+    if ($rayHitsSphere) {
+        $whereRayHitsSphere = $ray->pointAtParameter($valueOfTWhereRayHitsSphere);
+
+        // N is a unit length vector - so each component is between -1 and 1, then we map each component to the interval from 0 to 1, and then map x/y/z to r/g/b
+        //r/g/b
+        $surfaceNormal = $whereRayHitsSphere->subtract($sphereCenter)->makeUnitVector();
+        $normalAsColourMap = (new Vec3($surfaceNormal->x() + 1, $surfaceNormal->y() + 1, $surfaceNormal->z() + 1))->multiplyByConstant(0.5);
+        return $normalAsColourMap;
     }
 
     $unitDirection =  $ray->direction()->makeUnitVector();
