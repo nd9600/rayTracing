@@ -23,7 +23,7 @@ function random(): float
     return mt_rand(0, mt_getrandmax() - 1) / mt_getrandmax();
 }
 
-function getRandomPointInUnitSphere(): Vec3
+function randomPointInUnitSphere(): Vec3
 {
     // rejection method:
     // first, we pick a random point in the unit cube where ​x, y and z all range from -1 to +1
@@ -48,11 +48,13 @@ function colour(Ray $ray, Hitable $world): Vec3
     /** @var HitRecord $hitRecordOfWhereRayHitTheWorld */
     [$didRayHitTheWorld, $hitRecordOfWhereRayHitTheWorld] = $world->hit($ray, 0, INF);
     if ($didRayHitTheWorld) {
-        $surfaceNormal = $hitRecordOfWhereRayHitTheWorld->normal;
+        $hitRecordNormal = $hitRecordOfWhereRayHitTheWorld->normal;
+        $hitRecordP = $hitRecordOfWhereRayHitTheWorld->p;
 
-        // N is a unit length vector - so each component is between -1 and 1, then we map each component to the interval from 0 to 1, and then map x/y/z to r/g/b
-        $normalAsColourMap = (new Vec3($surfaceNormal->x() + 1, $surfaceNormal->y() + 1, $surfaceNormal->z() + 1))->multiplyByConstant(0.5);
-        return $normalAsColourMap;
+        $target = $hitRecordP->add($hitRecordNormal)->add(randomPointInUnitSphere());
+        $newRay = new Ray($hitRecordP, $target->subtract($hitRecordP));
+
+        return colour($newRay, $world)->multiplyByConstant(0.5);
     }
 
     $unitDirection =  $ray->direction()->makeUnitVector();
