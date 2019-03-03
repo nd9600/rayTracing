@@ -23,6 +23,19 @@ function random(): float
     return mt_rand(0, mt_getrandmax() - 1) / mt_getrandmax();
 }
 
+function getRandomPointInUnitSphere(): Vec3
+{
+    // rejection method:
+    // first, we pick a random point in the unit cube where ​x, y and z all range from -1 to +1
+    // if the point is outside the sphere, we reject this point and try again
+    $unitSphere = new Vec3(1, 1, 1);
+    $p = (new Vec3(random(), random(), random()))->multiplyByConstant(2)->subtract($unitSphere);
+    while ($p->squaredLength() >= 1) {
+        $p = (new Vec3(random(), random(), random()))->multiplyByConstant(2)->subtract($unitSphere);
+    }
+    return $p;
+}
+
 /**
  * Colours the surface normals of all objects in a world, otherwise lerp of white to blue
  * @param Ray $ray
