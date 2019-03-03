@@ -38,7 +38,7 @@ function doesHitSphere(Vec3 $center, float $radius, Ray $r): bool
     // we know A, B, C and r, so we can solve this quadratic equation for t
 
     // quadratic formula
-    // x = ( -b +- sqrt(b^2 - 4ac) )/ 2a
+    // x  = ( -b +- sqrt(b^2 - 4ac) )/ 2a
     // x1 = ( -b + sqrt(b^2 - 4ac) )/ 2a
     // x2 = ( -b - sqrt(b^2 - 4ac) )/ 2a
 
@@ -51,6 +51,13 @@ function doesHitSphere(Vec3 $center, float $radius, Ray $r): bool
     // if 2 roots, goes through the sphere (discriminant is +ve)
 
     // we can test it by colouring red any pixel that hits a small sphere we place at -1 on the z-axis
+
+    // (t^2 * B dot B) + (2t * B dot (A - C)) + ((A - C) dot (A - C)) - r^2 = 0
+    // a                 b                             c
+    // a = B dot B       b = 2 * B dot (A - C)         c = (A - C) dot (A - C) - r^2
+    // a vector X - Y means the vector *from* Y to X:
+    // since 0 + Y gets you to Y, then X - Y gets you to X
+    // 0 + Y + (X - Y) = X
 
     /** @var Vec3 A - C */
     $rOrigin = $r->origin();
