@@ -1,7 +1,11 @@
 <?php
 declare(strict_types=1);
 
+use RayTracer\Hitable;
+use RayTracer\HitableList;
+use RayTracer\HitRecord;
 use RayTracer\Ray;
+use RayTracer\Sphere;
 use RayTracer\Vec3;
 
 require "vendor/autoload.php";
@@ -79,20 +83,18 @@ function whereRayHitsSphere(Vec3 $center, float $radius, Ray $r): float
 /**
  * Colours the surface normals of a small sphere we place at -1 on the z-axis, otherwise lerp of white to blue
  * @param Ray $ray
+ * @param Hitable $world
  * @return Vec3
  */
-function colour(Ray $ray): Vec3
+function colour(Ray $ray, Hitable $world): Vec3
 {
-    $sphereCenter = new Vec3(0, 0, -1);
-    $sphereRadius = 0.5;
-    $valueOfTWhereRayHitsSphere = whereRayHitsSphere($sphereCenter, $sphereRadius, $ray);
-    $rayHitsSphere = $valueOfTWhereRayHitsSphere > 0;
-    if ($rayHitsSphere) {
-        $whereRayHitsSphere = $ray->pointAtParameter($valueOfTWhereRayHitsSphere);
+    /** @var boolean $didRayHitTheWorld */
+    /** @var HitRecord $hitRecordOfWhereRayHitTheWorld */
+    [$didRayHitTheWorld, $hitRecordOfWhereRayHitTheWorld] = $world->hit($ray, 0, INF);
+    if ($didRayHitTheWorld) {
+        $surfaceNormal = $hitRecordOfWhereRayHitTheWorld->normal;
 
         // N is a unit length vector - so each component is between -1 and 1, then we map each component to the interval from 0 to 1, and then map x/y/z to r/g/b
-        //r/g/b
-        $surfaceNormal = $whereRayHitsSphere->subtract($sphereCenter)->makeUnitVector();
         $normalAsColourMap = (new Vec3($surfaceNormal->x() + 1, $surfaceNormal->y() + 1, $surfaceNormal->z() + 1))->multiplyByConstant(0.5);
         return $normalAsColourMap;
     }
@@ -124,6 +126,12 @@ function writeFile($file, int $scale = 1)
     $vertical = new Vec3(0, 2, 0);
     $origin = new Vec3(0, 0, 0);
 
+    $listOfHitables = [
+        new Sphere(new Vec3(0, 0, -1), 0.5),
+//        new Sphere(new Vec3(0, -100.5, -1), 100)
+    ];
+    $world = new HitableList($listOfHitables);
+
     for ($j = $ny - 1; $j >= 0; $j--) {
         for ($i = 0; $i < $nx; $i++) {
 
@@ -137,7 +145,7 @@ function writeFile($file, int $scale = 1)
             $ray = new Ray($origin, $direction);
 
             // colour of the ray is determined by its position
-            $col = colour($ray);
+            $col = colour($ray, $world);
             $ir = intval(255.99 * $col[0]);
             $ig = intval(255.99 * $col[1]);
             $ib = intval(255.99 * $col[2]);
