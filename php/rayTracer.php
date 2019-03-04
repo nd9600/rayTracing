@@ -83,6 +83,45 @@ function colour(Ray $ray, Hitable $world): Vec3
 }
 
 /**
+ * @param int $numberOfSamples
+ * @param int $i
+ * @param int $j
+ * @param int $nx
+ * @param int $ny
+ * @param Camera $camera
+ * @param Hitable $world
+ * @return Vec3
+ */
+function makeColourForIJ(int $numberOfSamples, int $i, int $j, int $nx, int $ny, Camera $camera, Hitable $world): Vec3
+{
+    $col = new Vec3(0, 0, 0);
+    for ($s = 0 ; $s < $numberOfSamples ; $s++) {
+        $iWithAntiAliasing = $numberOfSamples === 1
+            ? $i
+            : $i + random();
+        $jWithAntiAliasing = $numberOfSamples === 1
+            ? $j
+            : $j + random();
+        
+        $u = floatval(($iWithAntiAliasing) / $nx);
+        $v = floatval(($jWithAntiAliasing) / $ny);
+        
+        // colour of the ray is determined by its position
+        $ray = $camera->getRay($u, $v);
+        $col = $col->add(colour($ray, $world));
+    }
+    $col = $col->divideByConstant($numberOfSamples);
+    
+    // with a digital camera, when twice the number of photons hit the sensor, it receives twice the signal (linear)
+    // our eyes perceive twice the light as being only a fraction brighter — and increasingly so for higher light intensities (nonlinear) - they're much more sensitive to changes in darkness than changes in light
+    
+    // it should be light grey, but image viewers assume that the image is “gamma corrected” (meaning the 0 to 1 values have some transform before being stored as a byte)
+    // so we have to actually gamma correct it: we can use “gamma 2” which means raising the color to the power 1/gamma, or 1/2 in the simple case
+    $col = new Vec3(sqrt($col->r()), sqrt($col->g()), sqrt($col->b()));
+    return $col;
+}
+
+/**
  * @param resource $file
  * @param int $scale
  * @param int $numberOfSamples
@@ -106,32 +145,9 @@ function writeFile($file, int $scale = 1, int $numberOfSamples = 1)
 
     for ($j = $ny - 1; $j >= 0; $j--) {
         for ($i = 0; $i < $nx; $i++) {
-
-            $col = new Vec3(0, 0, 0);
-            for ($s = 0; $s < $numberOfSamples; $s++) {
-                $iWithAntiAliasing = $numberOfSamples === 1
-                    ? $i
-                    : $i + random();
-                $jWithAntiAliasing = $numberOfSamples === 1
-                    ? $j
-                    : $j + random();
-
-                $u = floatval(($iWithAntiAliasing) / $nx);
-                $v = floatval(($jWithAntiAliasing) / $ny);
-
-                // colour of the ray is determined by its position
-                $ray = $camera->getRay($u, $v);
-                $col = $col->add(colour($ray, $world));
-            }
-            $col = $col->divideByConstant($numberOfSamples);
-
-            // with a digital camera, when twice the number of photons hit the sensor, it receives twice the signal (linear)
-            // our eyes perceive twice the light as being only a fraction brighter — and increasingly so for higher light intensities (nonlinear) - they're much more sensitive to changes in darkness than changes in light
-
-            // it should be light grey, but image viewers assume that the image is “gamma corrected” (meaning the 0 to 1 values have some transform before being stored as a byte)
-            // so we have to actually gamma correct it: we can use “gamma 2” which means raising the color to the power 1/gamma, or 1/2 in the simple case
-            $col = new Vec3(sqrt($col->r()), sqrt($col->g()), sqrt($col->b()));
-
+    
+            $col = makeColourForIJ($numberOfSamples, $i, $j, $nx, $ny, $camera, $world);
+    
             $ir = intval(255.99 * $col[0]);
             $ig = intval(255.99 * $col[1]);
             $ib = intval(255.99 * $col[2]);
@@ -142,7 +158,7 @@ function writeFile($file, int $scale = 1, int $numberOfSamples = 1)
 }
 
 $file = fopen("output.ppm", "w") or die("Unable to open file!");
-writeFile($file, 1, 1);
+writeFile($file, 1, 10);
 fclose($file);
 
 exit();
