@@ -11,6 +11,9 @@ use RayTracer\Vec3;
 
 require "vendor/autoload.php";
 
+# it'll hit xdebug's maximum nesting level of 256 otherwise
+ini_set('xdebug.max_nesting_level', '1000');
+
 # php rayTracer.php > 1.ppm
 # psysh rayTracer.php | tail -n +2 | bat
 
@@ -82,12 +85,12 @@ function colour(Ray $ray, Hitable $world): Vec3
 /**
  * @param resource $file
  * @param int $scale
+ * @param int $numberOfSamples
  */
-function writeFile($file, int $scale = 1)
+function writeFile($file, int $scale = 1, int $numberOfSamples = 1)
 {
     $nx = 200 * $scale;
     $ny = 100 * $scale;
-    $numberOfSamples = 1;
 
     fwrite($file, "P3\n");
     fwrite($file, "{$nx} {$ny}\n");
@@ -139,7 +142,7 @@ function writeFile($file, int $scale = 1)
 }
 
 $file = fopen("output.ppm", "w") or die("Unable to open file!");
-writeFile($file, 3);
+writeFile($file, 1, 1);
 fclose($file);
 
 exit();
