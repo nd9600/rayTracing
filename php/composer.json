@@ -3,5 +3,8 @@
     "psr-4": {
       "RayTracer\\": "src/"
     }
+  },
+  "require": {
+    "amphp/parallel-functions": "^0.1.3"
   }
 }
