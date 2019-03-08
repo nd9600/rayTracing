@@ -2,8 +2,10 @@
 declare(strict_types=1);
 
 
-namespace RayTracer;
+namespace RayTracer\Hitable;
 
+
+use RayTracer\Ray;
 
 class HitableList extends Hitable
 {

@@ -1,8 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace RayTracer;
+namespace RayTracer\Hitable;
 
+
+use RayTracer\HitRecord;
+use RayTracer\Material\Material;
+use RayTracer\Ray;
+use RayTracer\Vec3;
 
 class Sphere extends Hitable
 {
@@ -11,11 +16,15 @@ class Sphere extends Hitable
 
     /**  @var float */
     private $radius;
-
-    public function __construct(Vec3 $center, float $radius )
+    
+    /** @var Material */
+    private $material;
+    
+    public function __construct(Vec3 $center, float $radius, Material $material)
     {
         $this->center = $center;
         $this->radius = $radius;
+        $this->material = $material;
     }
 
     public function hit(Ray $ray, float $tMin, float $tMax): array
@@ -79,7 +88,7 @@ class Sphere extends Hitable
                 $fromCenterToHitPoint = $p->subtract($this->center);
                 $normal = $fromCenterToHitPoint->divideByConstant($this->radius);
 
-                $hitRecord = new HitRecord($t, $p, $normal);
+                $hitRecord = new HitRecord($t, $p, $normal, $this->material);
                 return [true, $hitRecord];
             }
 
@@ -90,7 +99,7 @@ class Sphere extends Hitable
                 $fromCenterToHitPoint = $p->subtract($this->center);
                 $normal = $fromCenterToHitPoint->divideByConstant($this->radius);
 
-                $hitRecord = new HitRecord($t, $p, $normal);
+                $hitRecord = new HitRecord($t, $p, $normal, $this->material);
                 return [true, $hitRecord];
             }
         }
