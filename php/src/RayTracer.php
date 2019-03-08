@@ -149,8 +149,8 @@ class RayTracer
         
         $lambertian1 = new Lambertian(new Vec3(0.8, 0.3, 0.3));
         $lambertian2 = new Lambertian(new Vec3(0.8, 0.8, 0.0));
-        $metal1 = new Metal(new Vec3(0.8, 0.6, 0.2));
-        $metal2 = new Metal(new Vec3(0.8, 0.8, 0.8));
+        $metal1 = new Metal(new Vec3(0.8, 0.6, 0.2), 0.3);
+        $metal2 = new Metal(new Vec3(0.8, 0.8, 0.8), 1);
         
         $listOfHitables = [
             new Sphere(new Vec3(0, 0, -1), 0.5, $lambertian1),

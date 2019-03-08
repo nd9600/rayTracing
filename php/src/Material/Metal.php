@@ -7,6 +7,7 @@ namespace RayTracer\Material;
 
 use RayTracer\HitRecord;
 use RayTracer\Ray;
+use RayTracer\RayTracer;
 use RayTracer\Vec3;
 
 class Metal extends Material
@@ -14,8 +15,14 @@ class Metal extends Material
     /** @var Vec3 */
     private $albedo;
     
-    public function __construct(Vec3 $albedo) {
+    /** @var float */
+    private $fuzziness;
+    
+    public function __construct(Vec3 $albedo, float $fuzziness) {
         $this->albedo = $albedo;
+        $this->fuzziness = $fuzziness < 1
+            ? $fuzziness
+            : 1;
     }
     
     public function scatter(Ray $ray, HitRecord $hitRecord): array
@@ -25,7 +32,8 @@ class Metal extends Material
         
         $reflectedRay = $this->reflect($ray->direction()->makeUnitVector(), $hitRecordNormal);
     
-        $scatteredRay = new Ray($hitRecordP, $reflectedRay);
+        $randomPointOnfuzzySphere = RayTracer::randomPointInUnitSphere()->multiplyByConstant($this->fuzziness);
+        $scatteredRay = new Ray($hitRecordP, $reflectedRay->add($randomPointOnfuzzySphere));
         $attenuationVector = $this->albedo;
         $didScatter = $scatteredRay->direction()->dot($hitRecordNormal) > 0;
         return [$didScatter, $scatteredRay, $attenuationVector];
