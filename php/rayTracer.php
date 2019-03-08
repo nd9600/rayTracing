@@ -14,7 +14,7 @@ ini_set('xdebug.max_nesting_level', '1000');
 $rayTracer = new RayTracer();
 
 $file = fopen("output.ppm", "w") or die("Unable to open file!");
-$rayTracer->writeFile($file, 1, 100);
+$rayTracer->writeFile($file, 3, 1, true);
 fclose($file);
 
 exit();

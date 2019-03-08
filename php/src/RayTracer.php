@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace RayTracer;
 
+use Amp\MultiReasonException;
+use function Amp\ParallelFunctions\parallelMap;
+use Amp\Promise;
 use RayTracer\Hitable\Hitable;
 use RayTracer\Hitable\HitableList;
 use RayTracer\Hitable\Sphere;
@@ -135,15 +138,13 @@ class RayTracer
      * @param resource $file
      * @param int $scale
      * @param int $numberOfSamples
+     * @param bool $runInParallel
+     * @throws \Throwable
      */
-    function writeFile($file, int $scale = 1, int $numberOfSamples = 1)
+    function writeFile($file, int $scale = 1, int $numberOfSamples = 1, bool $runInParallel = false)
     {
         $nx = 200 * $scale;
         $ny = 100 * $scale;
-        
-        fwrite($file, "P3\n");
-        fwrite($file, "{$nx} {$ny}\n");
-        fwrite($file, "255\n");
         
         $camera = new Camera();
         
@@ -160,17 +161,50 @@ class RayTracer
         ];
         $world = new HitableList($listOfHitables);
         
+        $ijArray = [];
+        
         for ($j = $ny - 1; $j >= 0; $j--) {
             for ($i = 0; $i < $nx; $i++) {
-                
+                $ijArray[] = [$i, $j];
+            }
+        }
+    
+        if ($runInParallel) {
+            try {
+                $pixels = Promise\wait(parallelMap($ijArray, function ($item) use ($numberOfSamples, $nx, $ny, $camera, $world) {
+                    $i = $item[0];
+                    $j = $item[1];
+                    $col = static::makeColourForIJ($numberOfSamples, $i, $j, $nx, $ny, $camera, $world);
+        
+                    $ir = intval(255.99 * $col[0]);
+                    $ig = intval(255.99 * $col[1]);
+                    $ib = intval(255.99 * $col[2]);
+        
+                    return "{$ir} {$ig} {$ib}\n";
+                }));
+            } catch (MultiReasonException $exception) {
+                error_log(json_encode($exception->getReasons()));
+                return;
+            }
+        } else {
+            $pixels = array_map(function ($item) use ($numberOfSamples, $nx, $ny, $camera, $world) {
+                $i = $item[0];
+                $j = $item[1];
                 $col = static::makeColourForIJ($numberOfSamples, $i, $j, $nx, $ny, $camera, $world);
-                
+        
                 $ir = intval(255.99 * $col[0]);
                 $ig = intval(255.99 * $col[1]);
                 $ib = intval(255.99 * $col[2]);
-                
-                fwrite($file, "{$ir} {$ig} {$ib}\n");
-            }
+        
+                return "{$ir} {$ig} {$ib}\n";
+            }, $ijArray);
+        }
+        fwrite($file, "P3\n");
+        fwrite($file, "{$nx} {$ny}\n");
+        fwrite($file, "255\n");
+        
+        foreach ($pixels as $pixel) {
+            fwrite($file, $pixel);
         }
     }
 }
